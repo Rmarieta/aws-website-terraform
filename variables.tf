@@ -7,6 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "Logical name of the project used for resource naming and tagging."
   type        = string
+  default     = "serverless-finance-tracker"
 }
 
 variable "frontend_bucket_name" {

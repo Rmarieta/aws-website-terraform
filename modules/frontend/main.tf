@@ -15,19 +15,12 @@ resource "aws_s3_bucket_public_access_block" "site" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_versioning" "site" {
-  bucket = aws_s3_bucket.site.id
-
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
 # ----------------------
 # CloudFront Origin Access Control (OAC)
 # ----------------------
 resource "aws_cloudfront_origin_access_control" "oac" {
-  name                              = "${locals.name_prefix}-oac"
+  name                              = "${local.name_prefix}-oac"
+  description                       = "OAC for the S3 bucket" 
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -37,18 +30,19 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 # CloudFront Distribution
 # ----------------------
 resource "aws_cloudfront_distribution" "site" {
-  enabled             = true
-  default_root_object = "index.html"
-  comment             = "${locals.name_prefix} distribution"
-
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
-    origin_id                = "s3-origin"
+    origin_id                = local.s3_origin_id
     origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
   }
 
+  enabled             = true
+  default_root_object = "index.html"
+  comment             = "${local.name_prefix} distribution"
+  price_class = "PriceClass_100"
+
   default_cache_behavior {
-    target_origin_id       = "s3-origin"
+    target_origin_id       = local.s3_origin_id
     viewer_protocol_policy = "redirect-to-https"
 
     allowed_methods = ["GET", "HEAD"]
@@ -77,6 +71,6 @@ resource "aws_cloudfront_distribution" "site" {
 # S3 bucket policy for CloudFront access
 # ----------------------
 resource "aws_s3_bucket_policy" "site" {
-  bucket = aws_s3_bucket.site.id
+  bucket = aws_s3_bucket.site.bucket
   policy = data.aws_iam_policy_document.bucket_policy.json
 }
