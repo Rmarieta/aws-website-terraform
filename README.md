@@ -4,6 +4,8 @@
 
 This repository allows you to deploy the infrastructure to host a static website on AWS using Terraform. The website is hosted on a private S3 bucket and the content of the website is exposed publicly via a CloudFront distribution. The CloudFront distribution gets restricted access to the S3 bucket content via OAC (Origin Access Control).
 
+![Infrastructure Diagram](assets/aws-serverless-website.png)
+
 The content of the website is stored in `/website/`, but here only a basic html is stored. This infrastructure can be used to serve any static website, it only requires you to copy your static files on the S3 bucket.
 
 The website is served over the default CloudFront secured domain name associated with the created distribution. The URL can be found in the CloudFront Console, or can be viewed in the output of the `terraform apply` command.
